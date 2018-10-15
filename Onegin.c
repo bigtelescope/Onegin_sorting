@@ -123,13 +123,31 @@ int main(int argc, char * argv[])
 	long long strings = CountChange(size, mainbuff);
 	char ** littlebuff = CreateLittleBuff(strings);
 
+	int i = 0;
+	for(i = 0; i < strings; i++)
+	{
+		printf("%p\n", littlebuff[i]);
+		printf("%s\n\n", littlebuff[i]);
+	}
+
 	Allocation(littlebuff, mainbuff, size, strings);
+
+	//int i = 0;
+	for(i = 0; i < strings; i++)
+	{
+		printf("%p\n", littlebuff[i]);
+		printf("%s\n\n", littlebuff[i]);
+	}
 
 	qsort(littlebuff, strings, sizeof(char *), Compare);
 
-	int i = 0;
+	//int i = 0;
 	for(i = 0; i < strings; i++)
+	{
+		printf("%p\n", littlebuff[i]);
 		printf("%s\n\n", littlebuff[i]);
+	}
+	
 	
 	fclose(ptrfile);
 	return 0;
