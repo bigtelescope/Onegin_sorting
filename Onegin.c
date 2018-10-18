@@ -2,7 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct Sentence
+{
+	char * begin;
+	char * end;
+	long long size;
+};
+
+struct StructBuff
+{
+	long long strings;
+	struct Sentence * structpoint;
+};
+
 //----------------------------------------------------------------
+
+//Calculates a size, creates main buffer and buffer of pointers,\
+ counts number of symbols and changed '\n' to '\0', distributes pointers of sentenses
+struct StructBuff Prepare(char * argv);
 
 //Calculates a size 
 long long SizeofFile(FILE * ptrfile, long int offset, int origin);//////////////////arguments
@@ -20,7 +37,7 @@ char ** CreatePointersBuff(long long strings);///////////////
 int Allocate(char ** pointsbuffer, char * mainbuff, long long size, long long strings);///////////
 
 //Prints arrays of symbols or pointers
-int Printing(char ** pointsbuffer, long long strings);
+int Printing(struct StructBuff structbuff);
 
 //Compares strings
 int Compare(const void * str1, const void * str2);
@@ -28,11 +45,9 @@ int Compare(const void * str1, const void * str2);
 //Cleans dynamic memory
 void CleanMem(char * mainbuffer, char ** pointsbuffer);////////////
 
-void Rotation(char * string, int n);
-
 //----------------------------------------------------------------
 
-long long SizeofFile(FILE * ptrfile, long int offset, int origin)
+/*long long SizeofFile(FILE * ptrfile, long int offset, int origin)
 {
 	if(ptrfile == NULL)
 	{
@@ -111,17 +126,24 @@ int Printing(char ** pointsbuff, long long strings)
 	for(i = 0; i < strings; i++)
 		printf("%s\n\n", pointsbuff[i]);
 }
+*/
+
+int Printing(struct StructBuff structbuff)
+{
+	
+}
 
 int Compare(const void * str1, const void * str2)
 {
 	if(str1 == NULL || str2 == NULL)
 	{
-		fprintf(stderr, "Incorrect reading of an array element\nEmeregency shutdown\n");
+		fprintf(stderr, "Incorrect reading of an array element\n"
+							"Emeregency shutdown\n");
 		///errno
 	}
-	char** string1 = (char**)str1;
-	char** string2 = (char**)str2;
-	return strcmp(*string1, *string2);
+	struct Sentence * struct1 = (struct Sentence *)str1;
+	struct Sentence * struct2 = (struct Sentence *)str2;
+	return strcmp((struct1->begin), (struct2->begin));
 }
 
 void CleanMem(char * mainbuffer, char ** pointsbuffer)
@@ -130,37 +152,79 @@ void CleanMem(char * mainbuffer, char ** pointsbuffer)
 	free(pointsbuffer);
 }
 
-void Rotation(char * string, int n)
+struct StructBuff Prepare(char * argv)
 {
-	int i = 0;
-	char * copystring = (char *)calloc(n, sizeof(char*));
-	////
-	for(i = 0; i < n; i++)
-		copystring[i] = string[n - i];
-	for(i = 0; i < n; i++)
-		string[i] = copystring[i];
-	free(copystring);
+	struct Sentence sentense;
+	int i = 0, j = 0, k = 0;
+	long long strings = 0;
+	
+	FILE * ptrfile = fopen(argv, "r");
+
+	fseek(ptrfile, 0, SEEK_END);
+	long long size = ftell(ptrfile);
+	rewind(ptrfile);	
+	
+	char * mainbuffer = (char *)calloc(size, sizeof(char));
+
+	fread(mainbuffer, sizeof(char), size, ptrfile);	
+	
+	for(i = 0; i < size; i++)
+	{
+		if(mainbuffer[i] == '\n')
+		{
+			mainbuffer[i] = '\0';
+			strings++;
+		}
+	}
+	
+	struct Sentence * structbuffer = (struct Sentence *)calloc(strings, sizeof(struct Sentence));
+
+	structbuffer[0].begin = mainbuffer;
+	structbuffer[strings - 1].end = mainbuffer + size - 1;
+	for(i = 1, j = 1; i < size - 1; i++)
+	{
+		if(mainbuffer[i] == '\0')
+		{
+			structbuffer[j].begin = mainbuffer + i + 1;
+			structbuffer[j - 1].end = mainbuffer + i - 1;
+			j++;			
+		}
+	}
+
+	struct StructBuff structbuff = {strings, structbuffer};
+
+	return structbuff;
 }
 
 int main(int argc, char * argv[])
 {
-/////////////
-	FILE * ptrfile = fopen(argv[1], "r");
-	long long size = SizeofFile(ptrfile, 0, SEEK_END);
-	char * mainbuff = CreateBuff(size);
-	fread(mainbuff, sizeof(char), size, ptrfile);
+	struct StructBuff structbuff = Prepare(argv[1]);
+	int i = 0;
+	for(i = 0; i < structbuff.strings; i++)
+	{
+		printf("%p\n", structbuff.structpoint[i].begin);
+		printf("%p\n", structbuff.structpoint[i].end);
+		printf("%s\n", structbuff.structpoint[i].begin);
+		//printf("%s\n", structbuff.structpoint[i].end);
+		printf("\n");
+	}
 
-	long long strings = CountChange(size, mainbuff);
-	char ** pointsbuffer = CreatePointersBuff(strings);
+	qsort(structbuff.structpoint, structbuff.strings, sizeof(struct Sentence), Compare);
 
-	Allocation(pointsbuffer, mainbuff, size, strings);
-/////////////
-	qsort(pointsbuffer, strings, sizeof(char *), Compare);
+	printf("--------------------------------------------------\n");
 
-	Printing(pointsbuffer, strings);
+	for(i = 0; i < structbuff.strings; i++)
+	{
+		printf("%p\n", structbuff.structpoint[i].begin);
+		printf("%p\n", structbuff.structpoint[i].end);
+		printf("%s\n", structbuff.structpoint[i].begin);
+		//printf("%s\n", structbuff.structpoint[i].end);
+		printf("\n");
+	}
 
-	CleanMem(mainbuff, pointsbuffer);
-	fclose(ptrfile);
+	//Printing(pointsbuffer, strings);
+
+	//CleanMem(mainbuff, pointsbuffer);
 	return 0;
 }
 
