@@ -5,25 +5,30 @@
 //----------------------------------------------------------------
 
 //Calculates a size 
-long long SizeofFile(FILE * ptrfile, long int offset, int origin);
+long long SizeofFile(FILE * ptrfile, long int offset, int origin);//////////////////arguments
 
 //Creates main buffer
-char * CreateBuff(long long size);
+char * CreateBuff(long long size);//////////////////////
 
 //Counts number of symbols and changed '\n' to '\0'
-long long CountChange(long long size, char * buffer);
+long long CountChange(long long size, char * buffer);////////////
 
 //Creates small buffer of pointers
-char ** CreateLittleBuff(long long strings);
+char ** CreatePointersBuff(long long strings);///////////////
 
 //Distributes pointers of sentenses
-int Allocate(char ** littlebuffer, char * mainbuff, long long size, long long strings);
+int Allocate(char ** pointsbuffer, char * mainbuff, long long size, long long strings);///////////
 
 //Prints arrays of symbols or pointers
-void Printing();
+int Printing(char ** pointsbuffer, long long strings);
 
 //Compares strings
 int Compare(const void * str1, const void * str2);
+
+//Cleans dynamic memory
+void CleanMem(char * mainbuffer, char ** pointsbuffer);////////////
+
+void Rotation(char * string, int n);
 
 //----------------------------------------------------------------
 
@@ -32,7 +37,7 @@ long long SizeofFile(FILE * ptrfile, long int offset, int origin)
 	if(ptrfile == NULL)
 	{
 		printf("Incorrect reading of file\nEmeregency shutdown\n");
-		exit(1);
+		///errno
 	}
 	fseek(ptrfile, offset, origin);
 	long long size = ftell(ptrfile);
@@ -42,50 +47,50 @@ long long SizeofFile(FILE * ptrfile, long int offset, int origin)
 
 char * CreateBuff(long long size)
 {
-	char * buffer = (char *)calloc(size, sizeof(char));
-	if(buffer == NULL)
+	char * mainbuffer = (char *)calloc(size, sizeof(char));
+	if(mainbuffer == NULL)
 	{
 		printf("Error assigning memory\nEmergency shutdown\n");
-		exit(2);
+		///errno
 	}
-	return buffer;
+	return mainbuffer;
 }
 
-char ** CreateLittleBuff(long long strings)
+char ** CreatePointersBuff(long long strings)
 {
-	char ** littlebuffer = (char **)calloc(strings, sizeof(char *));
-	if(littlebuffer == NULL)
+	char ** pointsbuffer = (char **)calloc(strings, sizeof(char *));
+	if(pointsbuffer == NULL)
 	{
 		printf("Error assigning memory\nEmergency shutdown\n");
-		exit(2);
+		///errno
 	}
-	return littlebuffer;
+	return pointsbuffer;
 }
 
-long long CountChange(long long size, char * buffer)
+long long CountChange(long long size, char * mainbuffer)
 {
 	int i = 0;
 	long long counter = 0;
 	for(i = 0; i < size; i++)
 	{
-		if(buffer[i] == '\n')
+		if(mainbuffer[i] == '\n')
 		{
-			buffer[i] = '\0';
+			mainbuffer[i] = '\0';
 			counter++;
 		}
 	}
 	return counter;
 }
 
-int Allocation(char ** littlebuffer, char * mainbuff, long long size, long long strings)
+int Allocation(char ** pointsbuffer, char * mainbuff, long long size, long long strings)
 {
 	int i = 1, j = 1, k = 0;
-	littlebuffer[0] = mainbuff;
+	pointsbuffer[0] = mainbuff;
 	for(i = 1, j = 1; i < size - 1; i++)
 	{
 		if(mainbuff[i] == '\0')
 		{
-			littlebuffer[j] = mainbuff + i + 1;
+			pointsbuffer[j] = mainbuff + i + 1;
 			j++;
 		}
 	}
@@ -95,60 +100,74 @@ int Allocation(char ** littlebuffer, char * mainbuff, long long size, long long 
 		return j;
 }
 
-/*void Printing()
+int Printing(char ** pointsbuff, long long strings)
 {
+	if(pointsbuff == NULL)
+	{
+		printf("Incorrect reading of file\nEmeregency shutdown\n");
+		///errno
+	}
 	int i = 0;
-	
-}*/
+	for(i = 0; i < strings; i++)
+		printf("%s\n\n", pointsbuff[i]);
+}
 
 int Compare(const void * str1, const void * str2)
 {
 	if(str1 == NULL || str2 == NULL)
 	{
-		printf("Incorrect reading of an array element\nEmeregency shutdown\n");
-		exit(3);
+		fprintf(stderr, "Incorrect reading of an array element\nEmeregency shutdown\n");
+		///errno
 	}
-	char* string1 = (char*)str1;
-	char* string2 = (char*)str2;
-	return strcmp(string1, string2);
+	char** string1 = (char**)str1;
+	char** string2 = (char**)str2;
+	return strcmp(*string1, *string2);
+}
+
+void CleanMem(char * mainbuffer, char ** pointsbuffer)
+{
+	free(mainbuffer);
+	free(pointsbuffer);
+}
+
+void Rotation(char * string, int n)
+{
+	int i = 0;
+	char * copystring = (char *)calloc(n, sizeof(char*));
+	////
+	for(i = 0; i < n; i++)
+		copystring[i] = string[n - i];
+	for(i = 0; i < n; i++)
+		string[i] = copystring[i];
+	free(copystring);
 }
 
 int main(int argc, char * argv[])
 {
+/////////////
 	FILE * ptrfile = fopen(argv[1], "r");
 	long long size = SizeofFile(ptrfile, 0, SEEK_END);
 	char * mainbuff = CreateBuff(size);
 	fread(mainbuff, sizeof(char), size, ptrfile);
 
 	long long strings = CountChange(size, mainbuff);
-	char ** littlebuff = CreateLittleBuff(strings);
+	char ** pointsbuffer = CreatePointersBuff(strings);
 
-	int i = 0;
-	for(i = 0; i < strings; i++)
-	{
-		printf("%p\n", littlebuff[i]);
-		printf("%s\n\n", littlebuff[i]);
-	}
+	Allocation(pointsbuffer, mainbuff, size, strings);
+/////////////
+	qsort(pointsbuffer, strings, sizeof(char *), Compare);
 
-	Allocation(littlebuff, mainbuff, size, strings);
+	Printing(pointsbuffer, strings);
 
-	//int i = 0;
-	for(i = 0; i < strings; i++)
-	{
-		printf("%p\n", littlebuff[i]);
-		printf("%s\n\n", littlebuff[i]);
-	}
-
-	qsort(littlebuff, strings, sizeof(char *), Compare);
-
-	//int i = 0;
-	for(i = 0; i < strings; i++)
-	{
-		printf("%p\n", littlebuff[i]);
-		printf("%s\n\n", littlebuff[i]);
-	}
-	
-	
+	CleanMem(mainbuff, pointsbuffer);
 	fclose(ptrfile);
 	return 0;
 }
+
+
+
+
+
+
+
+
