@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 struct Sentence
 {
 	char * begin;
 	char * end;
-	long long size;
+	long int size;
 };
 
 struct StructBuff
@@ -21,129 +22,23 @@ struct StructBuff
  counts number of symbols and changed '\n' to '\0', distributes pointers of sentenses
 struct StructBuff Prepare(char * argv);
 
-//Calculates a size 
-long long SizeofFile(FILE * ptrfile, long int offset, int origin);//////////////////arguments
-
-//Creates main buffer
-char * CreateBuff(long long size);//////////////////////
-
-//Counts number of symbols and changed '\n' to '\0'
-long long CountChange(long long size, char * buffer);////////////
-
-//Creates small buffer of pointers
-char ** CreatePointersBuff(long long strings);///////////////
-
-//Distributes pointers of sentenses
-int Allocate(char ** pointsbuffer, char * mainbuff, long long size, long long strings);///////////
-
 //Prints arrays of symbols or pointers
 int Printing(struct StructBuff structbuff);
 
 //Compares strings
 int Compare(const void * str1, const void * str2);
 
+//Compares strings in reverse order
+int ReverseCompare(const void * str1, const void * str2);
+
 //Cleans dynamic memory
 void CleanMem(char * mainbuffer, char ** pointsbuffer);////////////
 
 //----------------------------------------------------------------
 
-/*long long SizeofFile(FILE * ptrfile, long int offset, int origin)
-{
-	if(ptrfile == NULL)
-	{
-		printf("Incorrect reading of file\nEmeregency shutdown\n");
-		///errno
-	}
-	fseek(ptrfile, offset, origin);
-	long long size = ftell(ptrfile);
-	rewind(ptrfile);	
-	return size;
-}
-
-char * CreateBuff(long long size)
-{
-	char * mainbuffer = (char *)calloc(size, sizeof(char));
-	if(mainbuffer == NULL)
-	{
-		printf("Error assigning memory\nEmergency shutdown\n");
-		///errno
-	}
-	return mainbuffer;
-}
-
-char ** CreatePointersBuff(long long strings)
-{
-	char ** pointsbuffer = (char **)calloc(strings, sizeof(char *));
-	if(pointsbuffer == NULL)
-	{
-		printf("Error assigning memory\nEmergency shutdown\n");
-		///errno
-	}
-	return pointsbuffer;
-}
-
-long long CountChange(long long size, char * mainbuffer)
-{
-	int i = 0;
-	long long counter = 0;
-	for(i = 0; i < size; i++)
-	{
-		if(mainbuffer[i] == '\n')
-		{
-			mainbuffer[i] = '\0';
-			counter++;
-		}
-	}
-	return counter;
-}
-
-int Allocation(char ** pointsbuffer, char * mainbuff, long long size, long long strings)
-{
-	int i = 1, j = 1, k = 0;
-	pointsbuffer[0] = mainbuff;
-	for(i = 1, j = 1; i < size - 1; i++)
-	{
-		if(mainbuff[i] == '\0')
-		{
-			pointsbuffer[j] = mainbuff + i + 1;
-			j++;
-		}
-	}
-	if(j != (int)strings)
-		printf("There is a mistake with allocation of pointers to little buffer\n");
-	else
-		return j;
-}
-
-int Printing(char ** pointsbuff, long long strings)
-{
-	if(pointsbuff == NULL)
-	{
-		printf("Incorrect reading of file\nEmeregency shutdown\n");
-		///errno
-	}
-	int i = 0;
-	for(i = 0; i < strings; i++)
-		printf("%s\n\n", pointsbuff[i]);
-}
-*/
-
 int Printing(struct StructBuff structbuff)
 {
 	
-}
-
-int Compare(const void * str1, const void * str2)
-{
-	if(str1 == NULL || str2 == NULL)
-	{
-		fprintf(stderr, "Incorrect reading of an array element\n"
-							"Emeregency shutdown\n");
-		///errno
-	}
-	struct Sentence * struct1 = (struct Sentence *)str1;
-	struct Sentence * struct2 = (struct Sentence *)str2;
-	return strcmp((struct1->begin), (struct2->begin));
 }
 
 void CleanMem(char * mainbuffer, char ** pointsbuffer)
@@ -196,29 +91,70 @@ struct StructBuff Prepare(char * argv)
 	return structbuff;
 }
 
+int Compare(const void * str1, const void * str2)
+{
+	if(str1 == NULL || str2 == NULL)
+	{
+		fprintf(stderr, "Incorrect reading of an array element\n"
+							"Emeregency shutdown\n");
+		///errno
+	}
+	struct Sentence * struct1 = (struct Sentence *)str1;
+	struct Sentence * struct2 = (struct Sentence *)str2;
+	return strcmp((struct1->begin), (struct2->begin));
+}
+
+int ReverseCompare(const void * str1, const void * str2)
+{
+	///Warning!!!
+	struct Sentence * struct1 = (struct Sentence *)str1;
+	struct Sentence * struct2 = (struct Sentence *)str2;
+	int i = 0;
+	while(struct1->end[0 - i] != '\0')
+	{
+		if(struct2->end[0 - i] == '\0')
+			return 1;
+		else if(struct1->end[0 - i] < struct2->end[0 - i])
+			return -1;
+		else if(struct1->end[0 - i] > struct2->end[0 - i])
+			return 1;
+		else if(struct1->end[0 - i] == struct2->end[0 - i])
+			return 0;
+		i++;
+	}
+}
+
 int main(int argc, char * argv[])
 {
 	struct StructBuff structbuff = Prepare(argv[1]);
 	int i = 0;
-	for(i = 0; i < structbuff.strings; i++)
+/*	for(i = 0; i < structbuff.strings; i++)
 	{
-		printf("%p\n", structbuff.structpoint[i].begin);
-		printf("%p\n", structbuff.structpoint[i].end);
+		//printf("%p\n", structbuff.structpoint[i].begin);
+		//printf("%p\n", structbuff.structpoint[i].end);
 		printf("%s\n", structbuff.structpoint[i].begin);
 		//printf("%s\n", structbuff.structpoint[i].end);
 		printf("\n");
 	}
-
-	qsort(structbuff.structpoint, structbuff.strings, sizeof(struct Sentence), Compare);
+*/
+	//qsort(structbuff.structpoint, structbuff.strings, sizeof(struct Sentence), Compare);
+	qsort(structbuff.structpoint, structbuff.strings, sizeof(struct Sentence), ReverseCompare);
 
 	printf("--------------------------------------------------\n");
 
 	for(i = 0; i < structbuff.strings; i++)
 	{
-		printf("%p\n", structbuff.structpoint[i].begin);
-		printf("%p\n", structbuff.structpoint[i].end);
+		structbuff.structpoint[i].size = (structbuff.structpoint[i].end - structbuff.structpoint[i].begin);
+	}
+
+	for(i = 0; i < structbuff.strings; i++)
+	{
+		//printf("poiner to beggining = %p\n", structbuff.structpoint[i].begin);
+		//printf("pointer to end = %p\n", structbuff.structpoint[i].end);
+		//printf("%s\n", structbuff.structpoint[i].begin + structbuff.structpoint[i].size);
 		printf("%s\n", structbuff.structpoint[i].begin);
 		//printf("%s\n", structbuff.structpoint[i].end);
+		//printf("size = %ld\n", structbuff.structpoint[i].size);
 		printf("\n");
 	}
 
