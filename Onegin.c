@@ -7,7 +7,6 @@ struct SentenceStruct
 {
 	char * begin;
 	char * end;
-	long int size;
 };
 
 struct TextStruct
@@ -23,7 +22,7 @@ struct TextStruct
 struct TextStruct Prepare(char * argv);
 
 //Prints arrays of symbols or pointers
-int Printing(struct TextStruct TextStruct);
+void Printing(struct TextStruct structtext);
 
 //Compares strings
 int Compare(const void * str1, const void * str2);
@@ -32,19 +31,26 @@ int Compare(const void * str1, const void * str2);
 int ReverseCompare(const void * str1, const void * str2);
 
 //Cleans dynamic memory
-void CleanMem(char * mainbuffer, char ** pointsbuffer);////////////
+void CleanMem(struct TextStruct structtext);
 
 //----------------------------------------------------------------
 
-int Printing(struct TextStruct TextStruct)
+void Printing(struct TextStruct structtext)
 {
-	
+	int i = 0;
+	for(i = 0; i < structtext.strings; i++)
+	{
+		//printf("size = %ld\n", structtext.sentencepoint[i].end - structtext.sentencepoint[i].begin);
+		//printf("poiner to beggining = %p\n", structtext.sentencepoint[i].begin);
+		//printf("pointer to end = %p\n", structtext.sentencepoint[i].end);
+		printf("%s\n\n", structtext.sentencepoint[i].begin);
+		printf("-------------------------------------------------\n\n");
+	}
 }
 
-void CleanMem(char * mainbuffer, char ** pointsbuffer)
+void CleanMem(struct TextStruct structtext)
 {
-	free(mainbuffer);
-	free(pointsbuffer);
+	free(structtext.sentencepoint);
 }
 
 struct TextStruct Prepare(char * argv)
@@ -54,7 +60,6 @@ struct TextStruct Prepare(char * argv)
 	long long strings = 0;
 	
 	FILE * ptrfile = fopen(argv, "r");
-
 	fseek(ptrfile, 0, SEEK_END);
 	long long size = ftell(ptrfile);
 	rewind(ptrfile);	
@@ -72,23 +77,23 @@ struct TextStruct Prepare(char * argv)
 		}
 	}
 	
-	struct SentenceStruct * TextStructer = (struct SentenceStruct *)calloc(strings, sizeof(struct SentenceStruct));
+	struct SentenceStruct * structtexter = (struct SentenceStruct *)calloc(strings, sizeof(struct SentenceStruct));
 
-	TextStructer[0].begin = mainbuffer;
-	TextStructer[strings - 1].end = mainbuffer + size - 1;
+	structtexter[0].begin = mainbuffer;
+	structtexter[strings - 1].end = mainbuffer + size - 1;
 	for(i = 1, j = 1; i < size - 1; i++)
 	{
 		if(mainbuffer[i] == '\0')
 		{
-			TextStructer[j].begin = mainbuffer + i + 1;
-			TextStructer[j - 1].end = mainbuffer + i - 1;
+			structtexter[j].begin = mainbuffer + i + 1;
+			structtexter[j - 1].end = mainbuffer + i - 1;
 			j++;			
 		}
 	}
 
-	struct TextStruct TextStruct = {strings, TextStructer};
+	struct TextStruct structtext = {strings, structtexter};
 
-	return TextStruct;
+	return structtext;
 }
 
 int Compare(const void * str1, const void * str2)
@@ -132,39 +137,12 @@ int ReverseCompare(const void * str1, const void * str2)
 
 int main(int argc, char * argv[])
 {
-	struct TextStruct TextStruct = Prepare(argv[1]);
-	int i = 0;
-	qsort(TextStruct.sentencepoint, TextStruct.strings, sizeof(struct SentenceStruct), Compare);
-	qsort(TextStruct.sentencepoint, TextStruct.strings, sizeof(struct SentenceStruct), ReverseCompare);
-
-	printf("--------------------------------------------------\n");
-
-	for(i = 0; i < TextStruct.strings; i++)
-	{
-		TextStruct.sentencepoint[i].size = (TextStruct.sentencepoint[i].end - TextStruct.sentencepoint[i].begin);
-	}
-
-	for(i = 0; i < TextStruct.strings; i++)
-	{
-		//printf("poiner to beggining = %p\n", TextStruct.sentencepoint[i].begin);
-		//printf("pointer to end = %p\n", TextStruct.sentencepoint[i].end);
-		//printf("%s\n", TextStruct.sentencepoint[i].begin + TextStruct.sentencepoint[i].size);
-		printf("%s\n", TextStruct.sentencepoint[i].begin);
-		//printf("%s\n", TextStruct.sentencepoint[i].end);
-		//printf("size = %ld\n", TextStruct.sentencepoint[i].size);
-		printf("\n");
-	}
-
-	//Printing(pointsbuffer, strings);
-
-	//CleanMem(mainbuff, pointsbuffer);
+	struct TextStruct structtext = Prepare(argv[1]);
+	qsort(structtext.sentencepoint, structtext.strings, sizeof(struct SentenceStruct), ReverseCompare);
+	Printing(structtext);
+	CleanMem(structtext);
 	return 0;
 }
-
-
-
-
-
 
 
 
