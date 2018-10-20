@@ -109,18 +109,24 @@ int ReverseCompare(const void * str1, const void * str2)
 	///Warning!!!
 	struct Sentence * struct1 = (struct Sentence *)str1;
 	struct Sentence * struct2 = (struct Sentence *)str2;
-	int i = 0;
+	int i = 0, j = 0;
+	if(strcmp(struct1->begin, struct2->begin) == 0)
+		return 0;
 	while(struct1->end[0 - i] != '\0')
 	{
-		if(struct2->end[0 - i] == '\0')
+		if(isalpha(struct1->end[0 - i]) == 0)
+			i++;
+		if(isalpha(struct2->end[0 - j]) == 0)
+			j++;
+
+		if(struct2->end[0 - j] == '\0')
 			return 1;
-		else if(struct1->end[0 - i] < struct2->end[0 - i])
+		else if(struct1->end[0 - i] < struct2->end[0 - j])
 			return -1;
-		else if(struct1->end[0 - i] > struct2->end[0 - i])
+		else if(struct1->end[0 - i] > struct2->end[0 - j])
 			return 1;
-		else if(struct1->end[0 - i] == struct2->end[0 - i])
-			return 0;
 		i++;
+		j++;
 	}
 }
 
