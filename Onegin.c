@@ -3,27 +3,27 @@
 #include <string.h>
 #include <ctype.h>
 
-struct Sentence
+struct SentenceStruct
 {
 	char * begin;
 	char * end;
 	long int size;
 };
 
-struct StructBuff
+struct TextStruct
 {
 	long long strings;
-	struct Sentence * structpoint;
+	struct SentenceStruct * sentencepoint;
 };
 
 //----------------------------------------------------------------
 
 //Calculates a size, creates main buffer and buffer of pointers,\
  counts number of symbols and changed '\n' to '\0', distributes pointers of sentenses
-struct StructBuff Prepare(char * argv);
+struct TextStruct Prepare(char * argv);
 
 //Prints arrays of symbols or pointers
-int Printing(struct StructBuff structbuff);
+int Printing(struct TextStruct TextStruct);
 
 //Compares strings
 int Compare(const void * str1, const void * str2);
@@ -36,7 +36,7 @@ void CleanMem(char * mainbuffer, char ** pointsbuffer);////////////
 
 //----------------------------------------------------------------
 
-int Printing(struct StructBuff structbuff)
+int Printing(struct TextStruct TextStruct)
 {
 	
 }
@@ -47,9 +47,9 @@ void CleanMem(char * mainbuffer, char ** pointsbuffer)
 	free(pointsbuffer);
 }
 
-struct StructBuff Prepare(char * argv)
+struct TextStruct Prepare(char * argv)
 {
-	struct Sentence sentense;
+	struct SentenceStruct sentense;
 	int i = 0, j = 0, k = 0;
 	long long strings = 0;
 	
@@ -72,23 +72,23 @@ struct StructBuff Prepare(char * argv)
 		}
 	}
 	
-	struct Sentence * structbuffer = (struct Sentence *)calloc(strings, sizeof(struct Sentence));
+	struct SentenceStruct * TextStructer = (struct SentenceStruct *)calloc(strings, sizeof(struct SentenceStruct));
 
-	structbuffer[0].begin = mainbuffer;
-	structbuffer[strings - 1].end = mainbuffer + size - 1;
+	TextStructer[0].begin = mainbuffer;
+	TextStructer[strings - 1].end = mainbuffer + size - 1;
 	for(i = 1, j = 1; i < size - 1; i++)
 	{
 		if(mainbuffer[i] == '\0')
 		{
-			structbuffer[j].begin = mainbuffer + i + 1;
-			structbuffer[j - 1].end = mainbuffer + i - 1;
+			TextStructer[j].begin = mainbuffer + i + 1;
+			TextStructer[j - 1].end = mainbuffer + i - 1;
 			j++;			
 		}
 	}
 
-	struct StructBuff structbuff = {strings, structbuffer};
+	struct TextStruct TextStruct = {strings, TextStructer};
 
-	return structbuff;
+	return TextStruct;
 }
 
 int Compare(const void * str1, const void * str2)
@@ -99,16 +99,16 @@ int Compare(const void * str1, const void * str2)
 							"Emeregency shutdown\n");
 		///errno
 	}
-	struct Sentence * struct1 = (struct Sentence *)str1;
-	struct Sentence * struct2 = (struct Sentence *)str2;
+	struct SentenceStruct * struct1 = (struct SentenceStruct *)str1;
+	struct SentenceStruct * struct2 = (struct SentenceStruct *)str2;
 	return strcmp((struct1->begin), (struct2->begin));
 }
 
 int ReverseCompare(const void * str1, const void * str2)
 {
 	///Warning!!!
-	struct Sentence * struct1 = (struct Sentence *)str1;
-	struct Sentence * struct2 = (struct Sentence *)str2;
+	struct SentenceStruct * struct1 = (struct SentenceStruct *)str1;
+	struct SentenceStruct * struct2 = (struct SentenceStruct *)str2;
 	int i = 0, j = 0;
 	if(strcmp(struct1->begin, struct2->begin) == 0)
 		return 0;
@@ -132,35 +132,26 @@ int ReverseCompare(const void * str1, const void * str2)
 
 int main(int argc, char * argv[])
 {
-	struct StructBuff structbuff = Prepare(argv[1]);
+	struct TextStruct TextStruct = Prepare(argv[1]);
 	int i = 0;
-/*	for(i = 0; i < structbuff.strings; i++)
-	{
-		//printf("%p\n", structbuff.structpoint[i].begin);
-		//printf("%p\n", structbuff.structpoint[i].end);
-		printf("%s\n", structbuff.structpoint[i].begin);
-		//printf("%s\n", structbuff.structpoint[i].end);
-		printf("\n");
-	}
-*/
-	//qsort(structbuff.structpoint, structbuff.strings, sizeof(struct Sentence), Compare);
-	qsort(structbuff.structpoint, structbuff.strings, sizeof(struct Sentence), ReverseCompare);
+	qsort(TextStruct.sentencepoint, TextStruct.strings, sizeof(struct SentenceStruct), Compare);
+	qsort(TextStruct.sentencepoint, TextStruct.strings, sizeof(struct SentenceStruct), ReverseCompare);
 
 	printf("--------------------------------------------------\n");
 
-	for(i = 0; i < structbuff.strings; i++)
+	for(i = 0; i < TextStruct.strings; i++)
 	{
-		structbuff.structpoint[i].size = (structbuff.structpoint[i].end - structbuff.structpoint[i].begin);
+		TextStruct.sentencepoint[i].size = (TextStruct.sentencepoint[i].end - TextStruct.sentencepoint[i].begin);
 	}
 
-	for(i = 0; i < structbuff.strings; i++)
+	for(i = 0; i < TextStruct.strings; i++)
 	{
-		//printf("poiner to beggining = %p\n", structbuff.structpoint[i].begin);
-		//printf("pointer to end = %p\n", structbuff.structpoint[i].end);
-		//printf("%s\n", structbuff.structpoint[i].begin + structbuff.structpoint[i].size);
-		printf("%s\n", structbuff.structpoint[i].begin);
-		//printf("%s\n", structbuff.structpoint[i].end);
-		//printf("size = %ld\n", structbuff.structpoint[i].size);
+		//printf("poiner to beggining = %p\n", TextStruct.sentencepoint[i].begin);
+		//printf("pointer to end = %p\n", TextStruct.sentencepoint[i].end);
+		//printf("%s\n", TextStruct.sentencepoint[i].begin + TextStruct.sentencepoint[i].size);
+		printf("%s\n", TextStruct.sentencepoint[i].begin);
+		//printf("%s\n", TextStruct.sentencepoint[i].end);
+		//printf("size = %ld\n", TextStruct.sentencepoint[i].size);
 		printf("\n");
 	}
 
