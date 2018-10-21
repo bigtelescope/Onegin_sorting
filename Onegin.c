@@ -5,7 +5,7 @@
 
 struct SentenceStruct
 {
-	char * begin;
+	char * start;
 	char * end;
 };
 
@@ -21,13 +21,13 @@ struct TextStruct
  counts number of symbols and changed '\n' to '\0', distributes pointers of sentenses
 struct TextStruct Prepare(char * argv);
 
-//Prints arrays of symbols or pointers
+//Prints strings of an array
 void Printing(struct TextStruct structtext);
 
 //Compares strings
 int Compare(const void * str1, const void * str2);
 
-//Compares strings in reverse order
+//Compares strings in a reverse order
 int ReverseCompare(const void * str1, const void * str2);
 
 //Cleans dynamic memory
@@ -40,12 +40,12 @@ void Printing(struct TextStruct structtext)
 	int i = 0;
 	for(i = 0; i < structtext.strings; i++)
 	{
-		//printf("size = %ld\n", structtext.sentencepoint[i].end - structtext.sentencepoint[i].begin);
-		//printf("poiner to beggining = %p\n", structtext.sentencepoint[i].begin);
+		//printf("size = %ld\n", structtext.sentencepoint[i].end - structtext.sentencepoint[i].start);
+		//printf("poiner to beggining = %p\n", structtext.sentencepoint[i].start);
 		//printf("pointer to end = %p\n", structtext.sentencepoint[i].end);
-		printf("%s\n\n", structtext.sentencepoint[i].begin);
-		printf("-------------------------------------------------\n\n");
+		printf("%s\n\n", structtext.sentencepoint[i].start);
 	}
+	printf("-------------------------------------------------\n\n");
 }
 
 void CleanMem(struct TextStruct structtext)
@@ -55,16 +55,19 @@ void CleanMem(struct TextStruct structtext)
 
 struct TextStruct Prepare(char * argv)
 {
-	struct SentenceStruct sentense;
-	int i = 0, j = 0, k = 0;
+	int i = 0, j = 0;
 	long long strings = 0;
 	
 	FILE * ptrfile = fopen(argv, "r");
+	if(ptrfile == NULL)
+		perror("Error of file reading: ");
 	fseek(ptrfile, 0, SEEK_END);
 	long long size = ftell(ptrfile);
 	rewind(ptrfile);	
 	
 	char * mainbuffer = (char *)calloc(size, sizeof(char));
+	if(mainbuffer == NULL)
+		perror("Error of memory allocationn: ");
 
 	fread(mainbuffer, sizeof(char), size, ptrfile);	
 	
@@ -77,21 +80,23 @@ struct TextStruct Prepare(char * argv)
 		}
 	}
 	
-	struct SentenceStruct * structtexter = (struct SentenceStruct *)calloc(strings, sizeof(struct SentenceStruct));
+	struct SentenceStruct * structsentence = (struct SentenceStruct *)calloc(strings, sizeof(struct SentenceStruct));
+	if(structsentence == NULL)
+		perror("Error of memory allocationn: ");
 
-	structtexter[0].begin = mainbuffer;
-	structtexter[strings - 1].end = mainbuffer + size - 1;
+	structsentence[0].start = mainbuffer;
+	structsentence[strings - 1].end = mainbuffer + size - 1;
 	for(i = 1, j = 1; i < size - 1; i++)
 	{
 		if(mainbuffer[i] == '\0')
 		{
-			structtexter[j].begin = mainbuffer + i + 1;
-			structtexter[j - 1].end = mainbuffer + i - 1;
+			structsentence[j].start = mainbuffer + i + 1;
+			structsentence[j - 1].end = mainbuffer + i - 1;
 			j++;			
 		}
 	}
 
-	struct TextStruct structtext = {strings, structtexter};
+	struct TextStruct structtext = {strings, structsentence};
 
 	return structtext;
 }
@@ -99,23 +104,20 @@ struct TextStruct Prepare(char * argv)
 int Compare(const void * str1, const void * str2)
 {
 	if(str1 == NULL || str2 == NULL)
-	{
-		fprintf(stderr, "Incorrect reading of an array element\n"
-							"Emeregency shutdown\n");
-		///errno
-	}
+		perror("Error of strings comparing: ");
 	struct SentenceStruct * struct1 = (struct SentenceStruct *)str1;
 	struct SentenceStruct * struct2 = (struct SentenceStruct *)str2;
-	return strcmp((struct1->begin), (struct2->begin));
+	return strcmp((struct1->start), (struct2->start));
 }
 
 int ReverseCompare(const void * str1, const void * str2)
 {
-	///Warning!!!
+	if(str1 == NULL || str2 == NULL)
+		perror("Error of strings comparing: ");
 	struct SentenceStruct * struct1 = (struct SentenceStruct *)str1;
 	struct SentenceStruct * struct2 = (struct SentenceStruct *)str2;
 	int i = 0, j = 0;
-	if(strcmp(struct1->begin, struct2->begin) == 0)
+	if(strcmp(struct1->start, struct2->start) == 0)
 		return 0;
 	while(struct1->end[0 - i] != '\0')
 	{
