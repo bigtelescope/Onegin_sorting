@@ -3,34 +3,38 @@
 #include <string.h>
 #include <ctype.h>
 
+/*! \brief Structure involving poiners to first and last symbols of a sentence */
 struct SentenceStruct
 {
-	char * start;
-	char * end;
+	char * start;///< Pointer to a first symbol
+	char * end;///< Pointer to a last symbol
 };
 
+/*! \brief Structure involving poiner to an array of stuctures and number of an array's members*/
 struct TextStruct
 {
-	long long strings;
-	struct SentenceStruct * sentencepoint;
+	long long strings;///< Number of members
+	struct SentenceStruct * sentencepoint;///< Pointer to an array
 };
 
 //----------------------------------------------------------------
 
-//Calculates a size, creates main buffer and buffer of pointers,\
- counts number of symbols and changed '\n' to '\0', distributes pointers of sentenses
+/*! \brief A function that makes all work
+
+	Calculates a size, creates main buffer and buffer of pointers,
+	counts number of symbols and changed '\n' to '\0', distributes pointers of sentenses*/
 struct TextStruct Prepare(char * argv);
 
-//Prints strings of an array
+/*! Prints strings of an array*/
 void Printing(struct TextStruct structtext);
 
-//Compares strings
+/*! Compares strings*/
 int Compare(const void * str1, const void * str2);
 
-//Compares strings in a reverse order
+/*! Compares strings in a reverse order*/
 int ReverseCompare(const void * str1, const void * str2);
 
-//Cleans dynamic memory
+/*! Cleans dynamic memory*/
 void CleanMem(struct TextStruct structtext);
 
 //----------------------------------------------------------------
