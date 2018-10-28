@@ -5,7 +5,7 @@
 #include <errno.h>
 
 /*! \brief Structure involving poiners to first and last symbols of a sentence */
-struct String
+struct String// typedef
 {
 	char * start;///< Pointer to a first symbol
 	char * end;///< Pointer to a last symbol
@@ -23,7 +23,7 @@ struct Text
 /*! \brief A function that makes all work
 
 	Calculates a size, creates main buffer and buffer of pointers,
-	counts number of symbols and changed '\n' to '\0', distributes pointers of sentenses*/
+	counts number of symbols and changed '\\n' to '\0', distributes pointers of sentenses*/
 struct Text ConstructText(char * argv);
 
 /*! Prints amount of an array*/
@@ -59,6 +59,7 @@ void Printing(struct Text structtext)
 void DestructText(struct Text structtext)
 {
 	free(structtext.lines);
+	structtext.lines = NULL;
 }
 
 long long FSize(FILE * ptrfile)
@@ -83,9 +84,8 @@ int RepChar(char * mainbuffer, long long size)
 		return -1;
 	}
 
-	int i = 0;
 	int amount = 0;
-	for(i = 0; i < size; i++)
+	for(int i = 0; i < size; i++)
 	{
 		if(mainbuffer[i] == '\n')
 		{
